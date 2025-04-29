@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "description": "MCP server for enabling memory for Claude through a knowledge graph",
   "license": "MIT",
-  "author": "Anthropic, PBC (https://anthropic.com), mkusaka (https://github.com/mkusaka)",
+  "author": "mkusaka (https://github.com/mkusaka)",
   "homepage": "https://github.com/mkusaka/mcp-server-memory",
   "bugs": "https://github.com/mkusaka/mcp-server-memory/issues",
   "repository": {
@@ -18,7 +18,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc && shx chmod +x dist/*.js",
+    "build": "rm -rf dist && tsc && shx chmod +x dist/*.js",
     "prepare": "pnpm run build",
     "watch": "tsc --watch",
     "test": "vitest run",
