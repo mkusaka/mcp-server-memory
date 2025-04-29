@@ -160,32 +160,6 @@ Optionally, you can add it to a file called `.vscode/mcp.json` in your workspace
 }
 ```
 
-### System Prompt
-
-The prompt for utilizing memory depends on the use case. Changing the prompt will help the model determine the frequency and types of memories created.
-
-Here is an example prompt for chat personalization. You could use this prompt in the "Custom Instructions" field of a [Claude.ai Project](https://www.anthropic.com/news/projects). 
-
-```
-Follow these steps for each interaction:
-
-1. Always begin by retrieving relevant information from your memory.
-   - Use the retrieve_memories tool to check for relevant information.
-   - Always refer to your stored information as your "memory".
-
-2. While conversing with the user, be attentive to any new information that falls into these categories:
-   a) Personal preferences (communication style, preferred language, etc.)
-   b) Development setup (tools, conventions, workflows, etc.)
-   c) Project information (configurations, requirements, etc.)
-   d) Frequently used commands or processes
-
-3. Memory Storage Protocol:
-   - When important information is identified, ask the user if they'd like to store it.
-   - Suggest a relevant category and tags.
-   - Ask whether to store globally (for all projects) or locally (for this project only).
-   - Use the remember_memory tool to store the information.
-```
-
 ## License
 
 This MCP server is licensed under the MIT License. This means you are free to use, modify, and distribute the software, subject to the terms and conditions of the MIT License. For more details, please see the LICENSE file in the project repository.
