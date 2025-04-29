@@ -8,7 +8,7 @@
   "bugs": "https://github.com/mkusaka/mcp-server-memory/issues",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mkusaka/mcp-server-memory.git"
+    "url": "git+https://github.com/mkusaka/mcp-server-memory.git"
   },
   "type": "module",
   "bin": {
