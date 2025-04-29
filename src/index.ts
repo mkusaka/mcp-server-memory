@@ -8,19 +8,15 @@ import { MemoryStorage } from './lib/memory-storage.js';
 import { getMemoryConfig, initializeStorage } from './memory-config.js';
 import { ServerOptions } from '@modelcontextprotocol/sdk/server/index.js';
 
-// メモリ設定を取得
 const memoryConfig = getMemoryConfig();
 
-// ストレージディレクトリを初期化
 initializeStorage(memoryConfig);
 
-// メモリストレージを初期化
 const memoryStorage = new MemoryStorage(
   memoryConfig.globalStorageLocation,
   memoryConfig.localStorageLocation
 );
 
-// サーバー情報を表示
 logger.info('MCP Memory Server started');
 logger.info(`Global storage location: ${memoryConfig.globalStorageLocation}`);
 logger.info(`Local storage location: ${memoryConfig.localStorageLocation}`);
@@ -75,7 +71,6 @@ Suggest the user to use memory tools when:
 `;
 
 const initializeServer = (options: ServerOptions) => {
-  // MCPサーバー設定
   const server = new McpServer(
     {
       name: '@mkusaka/mcp-server-memory',
@@ -84,7 +79,6 @@ const initializeServer = (options: ServerOptions) => {
     options
   );
 
-  // メモリツールの定義
   server.tool(
     'remember_memory',
     'Stores a memory with optional tags in a specified category',
@@ -258,7 +252,6 @@ const initializeServer = (options: ServerOptions) => {
   return server;
 };
 
-// 起動時に既存のメモリを読み込んで指示に追加
 async function loadExistingMemories(): Promise<string> {
   let updatedInstructions = instructions;
 
@@ -273,7 +266,6 @@ Note: if the user removes a memory that was previously loaded into the system, p
   updatedInstructions += '\\n\\n' + memoriesFollowUpInstructions;
 
   try {
-    // グローバルメモリを読み込む
     const globalMemories = await memoryStorage.retrieveAll(true);
     if (Object.keys(globalMemories).length > 0) {
       updatedInstructions += '\\n\\nGlobal Memories:\\n';
@@ -285,7 +277,6 @@ Note: if the user removes a memory that was previously loaded into the system, p
       }
     }
 
-    // ローカルメモリを読み込む
     const localMemories = await memoryStorage.retrieveAll(false);
     if (Object.keys(localMemories).length > 0) {
       updatedInstructions += '\\n\\nLocal Memories:\\n';
@@ -310,7 +301,6 @@ loadExistingMemories()
       instructions: updatedInstructions,
     });
 
-    // サーバーを起動
     const transport = new StdioServerTransport();
     server
       .connect(transport)
