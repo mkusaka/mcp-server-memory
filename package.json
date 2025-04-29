@@ -22,13 +22,21 @@
     "prepare": "pnpm run build",
     "watch": "tsc --watch",
     "test": "vitest run",
-    "start": "tsx src/index.ts"
+    "start": "tsx src/index.ts",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write \"**/*.{ts,json}\"",
+    "fix": "eslint . --ext .ts --fix && prettier --write \"**/*.{ts,json}\""
   },
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
     "@types/node": "^22",
+    "@typescript-eslint/eslint-plugin": "^8.31.1",
+    "@typescript-eslint/parser": "^8.31.1",
+    "eslint": "^9.25.1",
+    "eslint-config-prettier": "^10.1.2",
+    "prettier": "^3.5.3",
     "shx": "^0.3.4",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",
