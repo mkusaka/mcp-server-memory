@@ -1,33 +1,31 @@
-#!/usr/bin/env node  
-  
-import {
-  McpServer
-} from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
-import { logger } from "./lib/logger.js";
-import { MemoryStorage } from "./lib/memory-storage.js";
-import { getMemoryConfig, initializeStorage } from "./memory-config.js";
-import { ServerOptions } from "@modelcontextprotocol/sdk/server/index.js";
-  
-// メモリ設定を取得  
-const memoryConfig = getMemoryConfig();  
-  
-// ストレージディレクトリを初期化  
-initializeStorage(memoryConfig);  
-  
-// メモリストレージを初期化  
-const memoryStorage = new MemoryStorage(  
-  memoryConfig.globalStorageLocation,  
-  memoryConfig.localStorageLocation  
-);  
-  
-// サーバー情報を表示  
-logger.info("MCP Memory Server started");  
-logger.info(`Global storage location: ${memoryConfig.globalStorageLocation}`);  
-logger.info(`Local storage location: ${memoryConfig.localStorageLocation}`);  
-  
-// 詳細な説明文  
+#!/usr/bin/env node
+
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { z } from 'zod';
+import { logger } from './lib/logger.js';
+import { MemoryStorage } from './lib/memory-storage.js';
+import { getMemoryConfig, initializeStorage } from './memory-config.js';
+import { ServerOptions } from '@modelcontextprotocol/sdk/server/index.js';
+
+// メモリ設定を取得
+const memoryConfig = getMemoryConfig();
+
+// ストレージディレクトリを初期化
+initializeStorage(memoryConfig);
+
+// メモリストレージを初期化
+const memoryStorage = new MemoryStorage(
+  memoryConfig.globalStorageLocation,
+  memoryConfig.localStorageLocation
+);
+
+// サーバー情報を表示
+logger.info('MCP Memory Server started');
+logger.info(`Global storage location: ${memoryConfig.globalStorageLocation}`);
+logger.info(`Local storage location: ${memoryConfig.localStorageLocation}`);
+
+// 詳細な説明文
 const instructions = `  
 This extension allows storage and retrieval of categorized information with tagging support. It's designed to help  
 manage important information across sessions in a systematic and organized manner.  
@@ -74,89 +72,77 @@ Suggest the user to use memory tools when:
 - When the user mentions a keyword that triggers a memory tool  
 - When the user performs a routine task  
 - When the user executes a command and would benefit from remembering the exact command  
-`;  
-  
+`;
+
 const initializeServer = (options: ServerOptions) => {
   // MCPサーバー設定
-  const server = new McpServer({
-    name: "@mkusaka/mcp-memory-server",
-    version: "0.1.0",
-  }, options);
+  const server = new McpServer(
+    {
+      name: '@mkusaka/mcp-memory-server',
+      version: '0.1.0',
+    },
+    options
+  );
 
   // メモリツールの定義
   server.tool(
-    "remember_memory",
-    "Stores a memory with optional tags in a specified category",
+    'remember_memory',
+    'Stores a memory with optional tags in a specified category',
     {
-      category: z
-        .string()
-        .min(1)
-        .describe("The category to store the memory in"),
-      data: z.string().min(1).describe("The data to store in memory"),
+      category: z.string().min(1).describe('The category to store the memory in'),
+      data: z.string().min(1).describe('The data to store in memory'),
       tags: z
         .array(z.string())
         .optional()
         .default([])
-        .describe("Optional tags for categorizing the memory"),
-      is_global: z
-        .boolean()
-        .describe("Whether to store in global or local memory"),
+        .describe('Optional tags for categorizing the memory'),
+      is_global: z.boolean().describe('Whether to store in global or local memory'),
     },
     async ({ category, data, tags, is_global }) => {
       try {
-        logger.info(
-          `Storing memory in category: ${category}, isGlobal: ${is_global}`,
-        );
+        logger.info(`Storing memory in category: ${category}, isGlobal: ${is_global}`);
 
         await memoryStorage.remember(category, data, tags || [], is_global);
 
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Stored memory in category: ${category}`,
             },
           ],
         };
       } catch (error) {
-        logger.error("Error storing memory:", error);
+        logger.error('Error storing memory:', error);
         return {
           content: [
             {
-              type: "text",
-              text: `Error: ${
-                error instanceof Error ? error.message : String(error)
-              }`,
+              type: 'text',
+              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
             },
           ],
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
-    "retrieve_memories",
-    "Retrieves all memories from a specified category",
+    'retrieve_memories',
+    'Retrieves all memories from a specified category',
     {
       category: z
         .string()
         .min(1)
-        .describe(
-          "The category to retrieve memories from, use '*' for all categories",
-        ),
-      is_global: z
-        .boolean()
-        .describe("Whether to retrieve from global or local memory"),
+        .describe("The category to retrieve memories from, use '*' for all categories"),
+      is_global: z.boolean().describe('Whether to retrieve from global or local memory'),
     },
     async ({ category, is_global }) => {
       try {
-        logger.info(
-          `Retrieving memories from category: ${category}, isGlobal: ${is_global}`,
-        );
+        logger.info(`Retrieving memories from category: ${category}, isGlobal: ${is_global}`);
 
         let memories;
-        if (category === "*") {
+        if (category === '*') {
           memories = await memoryStorage.retrieveAll(is_global);
         } else {
           memories = await memoryStorage.retrieve(category, is_global);
@@ -165,55 +151,44 @@ const initializeServer = (options: ServerOptions) => {
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: JSON.stringify(memories, null, 2),
             },
           ],
         };
       } catch (error) {
-        logger.error("Error retrieving memories:", error);
+        logger.error('Error retrieving memories:', error);
         return {
           content: [
             {
-              type: "text",
-              text: `Error: ${
-                error instanceof Error ? error.message : String(error)
-              }`,
+              type: 'text',
+              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
             },
           ],
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
-    "remove_memory_category",
-    "Removes all memories within a specified category",
+    'remove_memory_category',
+    'Removes all memories within a specified category',
     {
-      category: z
-        .string()
-        .min(1)
-        .describe("The category to remove, use '*' for all categories"),
-      is_global: z
-        .boolean()
-        .describe("Whether to remove from global or local memory"),
+      category: z.string().min(1).describe("The category to remove, use '*' for all categories"),
+      is_global: z.boolean().describe('Whether to remove from global or local memory'),
     },
     async ({ category, is_global }) => {
       try {
-        logger.info(
-          `Removing memory category: ${category}, isGlobal: ${is_global}`,
-        );
+        logger.info(`Removing memory category: ${category}, isGlobal: ${is_global}`);
 
-        if (category === "*") {
+        if (category === '*') {
           await memoryStorage.clearAllGlobalOrLocalMemories(is_global);
           return {
             content: [
               {
-                type: "text",
-                text: `Cleared all ${
-                  is_global ? "global" : "local"
-                } memory categories`,
+                type: 'text',
+                text: `Cleared all ${is_global ? 'global' : 'local'} memory categories`,
               },
             ],
           };
@@ -222,145 +197,132 @@ const initializeServer = (options: ServerOptions) => {
           return {
             content: [
               {
-                type: "text",
+                type: 'text',
                 text: `Cleared memories in category: ${category}`,
               },
             ],
           };
         }
       } catch (error) {
-        logger.error("Error removing memory category:", error);
+        logger.error('Error removing memory category:', error);
         return {
           content: [
             {
-              type: "text",
-              text: `Error: ${
-                error instanceof Error ? error.message : String(error)
-              }`,
+              type: 'text',
+              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
             },
           ],
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
-    "remove_specific_memory",
-    "Removes a specific memory within a specified category",
+    'remove_specific_memory',
+    'Removes a specific memory within a specified category',
     {
-      category: z
-        .string()
-        .min(1)
-        .describe("The category containing the memory to remove"),
-      memory_content: z
-        .string()
-        .min(1)
-        .describe("Content of the memory to remove (partial match)"),
-      is_global: z
-        .boolean()
-        .describe("Whether to remove from global or local memory"),
+      category: z.string().min(1).describe('The category containing the memory to remove'),
+      memory_content: z.string().min(1).describe('Content of the memory to remove (partial match)'),
+      is_global: z.boolean().describe('Whether to remove from global or local memory'),
     },
     async ({ category, memory_content, is_global }) => {
       try {
-        logger.info(
-          `Removing specific memory from category: ${category}, isGlobal: ${is_global}`,
-        );
+        logger.info(`Removing specific memory from category: ${category}, isGlobal: ${is_global}`);
 
-        await memoryStorage.removeSpecificMemory(
-          category,
-          memory_content,
-          is_global,
-        );
+        await memoryStorage.removeSpecificMemory(category, memory_content, is_global);
 
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Removed specific memory from category: ${category}`,
             },
           ],
         };
       } catch (error) {
-        logger.error("Error removing specific memory:", error);
+        logger.error('Error removing specific memory:', error);
         return {
           content: [
             {
-              type: "text",
-              text: `Error: ${
-                error instanceof Error ? error.message : String(error)
-              }`,
+              type: 'text',
+              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
             },
           ],
           isError: true,
         };
       }
-    },
+    }
   );
 
   return server;
 };
-  
-// 起動時に既存のメモリを読み込んで指示に追加  
-async function loadExistingMemories(): Promise<string> {  
-  let updatedInstructions = instructions;  
-    
+
+// 起動時に既存のメモリを読み込んで指示に追加
+async function loadExistingMemories(): Promise<string> {
+  let updatedInstructions = instructions;
+
   const memoriesFollowUpInstructions = `  
 **Here are the user's currently saved memories:**  
 Please keep this information in mind when answering future questions.  
 Do not bring up memories unless relevant.  
 Note: if the user has not saved any memories, this section will be empty.  
 Note: if the user removes a memory that was previously loaded into the system, please remove it from the system instructions.  
-`;  
-    
-  updatedInstructions += "\\n\\n" + memoriesFollowUpInstructions;  
-    
-  try {  
-    // グローバルメモリを読み込む  
-    const globalMemories = await memoryStorage.retrieveAll(true);  
-    if (Object.keys(globalMemories).length > 0) {  
-      updatedInstructions += "\\n\\nGlobal Memories:\\n";  
-      for (const [category, memories] of Object.entries(globalMemories)) {  
-        updatedInstructions += `\\nCategory: ${category}\\n`;  
-        for (const memory of memories) {  
-          updatedInstructions += `- ${memory}\\n`;  
-        }  
-      }  
-    }  
-      
-    // ローカルメモリを読み込む  
-    const localMemories = await memoryStorage.retrieveAll(false);  
-    if (Object.keys(localMemories).length > 0) {  
-      updatedInstructions += "\\n\\nLocal Memories:\\n";  
-      for (const [category, memories] of Object.entries(localMemories)) {  
-        updatedInstructions += `\\nCategory: ${category}\\n`;  
-        for (const memory of memories) {  
-          updatedInstructions += `- ${memory}\\n`;  
-        }  
-      }  
-    }  
-  } catch (error) {  
-    logger.error("Error loading existing memories:", error);  
-  }  
-    
-  return updatedInstructions;  
-}  
-  
-// 既存のメモリを読み込んで指示に追加  
-loadExistingMemories().then(updatedInstructions => {  
-  const server = initializeServer({
-    instructions: updatedInstructions,
+`;
+
+  updatedInstructions += '\\n\\n' + memoriesFollowUpInstructions;
+
+  try {
+    // グローバルメモリを読み込む
+    const globalMemories = await memoryStorage.retrieveAll(true);
+    if (Object.keys(globalMemories).length > 0) {
+      updatedInstructions += '\\n\\nGlobal Memories:\\n';
+      for (const [category, memories] of Object.entries(globalMemories)) {
+        updatedInstructions += `\\nCategory: ${category}\\n`;
+        for (const memory of memories) {
+          updatedInstructions += `- ${memory}\\n`;
+        }
+      }
+    }
+
+    // ローカルメモリを読み込む
+    const localMemories = await memoryStorage.retrieveAll(false);
+    if (Object.keys(localMemories).length > 0) {
+      updatedInstructions += '\\n\\nLocal Memories:\\n';
+      for (const [category, memories] of Object.entries(localMemories)) {
+        updatedInstructions += `\\nCategory: ${category}\\n`;
+        for (const memory of memories) {
+          updatedInstructions += `- ${memory}\\n`;
+        }
+      }
+    }
+  } catch (error) {
+    logger.error('Error loading existing memories:', error);
+  }
+
+  return updatedInstructions;
+}
+
+// 既存のメモリを読み込んで指示に追加
+loadExistingMemories()
+  .then(updatedInstructions => {
+    const server = initializeServer({
+      instructions: updatedInstructions,
+    });
+
+    // サーバーを起動
+    const transport = new StdioServerTransport();
+    server
+      .connect(transport)
+      .then(() => {
+        logger.info('MCP Memory Server ready');
+      })
+      .catch(error => {
+        logger.error('Failed to connect server:', error);
+        process.exit(1);
+      });
   })
-    
-  // サーバーを起動  
-  const transport = new StdioServerTransport();  
-  server.connect(transport).then(() => {  
-    logger.info("MCP Memory Server ready");  
-  }).catch(error => {  
-    logger.error("Failed to connect server:", error);  
-    process.exit(1);  
-  });  
-}).catch(error => {  
-  logger.error("Failed to load existing memories:", error);  
-  process.exit(1);  
-});
+  .catch(error => {
+    logger.error('Failed to load existing memories:', error);
+    process.exit(1);
+  });
