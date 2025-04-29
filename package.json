@@ -16,7 +16,9 @@
   "scripts": {
     "build": "tsc && shx chmod +x dist/*.js",
     "prepare": "pnpm run build",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "test": "vitest run",
+    "start": "tsx src/index.ts"
   },
   "publishConfig": {
     "access": "public"
@@ -24,9 +26,14 @@
   "devDependencies": {
     "@types/node": "^22",
     "shx": "^0.3.4",
-    "typescript": "^5.6.2"
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.2"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.10.2"
+    "@modelcontextprotocol/sdk": "^1.10.2",
+    "commander": "^13.1.0",
+    "winston": "^3.17.0",
+    "zod": "^3.24.3"
   }
 }
