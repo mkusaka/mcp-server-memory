@@ -1,129 +1,92 @@
-# Knowledge Graph Memory Server
+# Category-based Memory Server
 
-A basic implementation of persistent memory using a local knowledge graph. This lets Claude remember information about the user across chats.
+A basic implementation of persistent memory using a category-based memory system. This lets Claude remember information across chats by storing it in categorized memory entries.
 
 ## Core Concepts
 
-### Entities
-Entities are the primary nodes in the knowledge graph. Each entity has:
-- A unique name (identifier)
-- An entity type (e.g., "person", "organization", "event")
-- A list of observations
+### Categories
+Categories are the primary organizational units in the memory system. Each category contains a collection of memories (pieces of information).
 
 Example:
 ```json
-{
-  "name": "John_Smith",
-  "entityType": "person",
-  "observations": ["Speaks fluent Spanish"]
-}
+"development": [
+  "Uses pnpm for package management",
+  "Prefers 2-space indentation"
+]
 ```
 
-### Relations
-Relations define directed connections between entities. They are always stored in active voice and describe how entities interact or relate to each other.
+### Tags
+Tags provide additional context and grouping for memories within a category. They can be used to filter and find related memories.
 
 Example:
-```json
-{
-  "from": "John_Smith",
-  "to": "Anthropic",
-  "relationType": "works_at"
-}
 ```
-### Observations
-Observations are discrete pieces of information about an entity. They are:
+# formatting style
+Uses 2-space indentation
+Prefers camelCase for variables
+```
 
-- Stored as strings
-- Attached to specific entities
+### Global vs Local Memories
+The memory system supports two storage locations:
+
+- **Global Memories**: Stored in the user's home directory (`~/.config/goose/memory`) and persist across all projects.
+- **Local Memories**: Stored in the current project directory (`.goose/memory`) and are specific to the current project.
+
+### Memory Storage
+Memories are stored as text entries, with the following characteristics:
+
+- Organized by categories (stored in separate files)
+- Can be tagged for easier retrieval
+- Stored in plain text files
 - Can be added or removed independently
-- Should be atomic (one fact per observation)
+- Should be atomic (one piece of information per memory)
 
-Example:
-```json
-{
-  "entityName": "John_Smith",
-  "observations": [
-    "Speaks fluent Spanish",
-    "Graduated in 2019",
-    "Prefers morning meetings"
-  ]
-}
+Example Memory File (`development.txt`):
+```
+# formatting style
+Uses 2-space indentation
+Prefers camelCase for variables
+
+# tools
+Uses eslint for linting
+Uses prettier for formatting
 ```
 
 ## API
 
 ### Tools
-- **create_entities**
-  - Create multiple new entities in the knowledge graph
-  - Input: `entities` (array of objects)
-    - Each object contains:
-      - `name` (string): Entity identifier
-      - `entityType` (string): Type classification
-      - `observations` (string[]): Associated observations
-  - Ignores entities with existing names
+- **remember_memory**
+  - Stores a memory with optional tags in a specified category
+  - Input:
+    - `category` (string): The category to store the memory in
+    - `data` (string): The data to store in memory
+    - `tags` (string[], optional): Optional tags for categorizing the memory
+    - `is_global` (boolean): Whether to store in global or local memory
+  - Stores the memory entry in the specified category with optional tags
 
-- **create_relations**
-  - Create multiple new relations between entities
-  - Input: `relations` (array of objects)
-    - Each object contains:
-      - `from` (string): Source entity name
-      - `to` (string): Target entity name
-      - `relationType` (string): Relationship type in active voice
-  - Skips duplicate relations
+- **retrieve_memories**
+  - Retrieves all memories from a specified category
+  - Input:
+    - `category` (string): The category to retrieve memories from, use '*' for all categories
+    - `is_global` (boolean): Whether to retrieve from global or local memory
+  - Returns memories from the specified category, grouped by tags
+  - Returns empty object if category doesn't exist
 
-- **add_observations**
-  - Add new observations to existing entities
-  - Input: `observations` (array of objects)
-    - Each object contains:
-      - `entityName` (string): Target entity
-      - `contents` (string[]): New observations to add
-  - Returns added observations per entity
-  - Fails if entity doesn't exist
+- **remove_memory_category**
+  - Removes all memories within a specified category
+  - Input:
+    - `category` (string): The category to remove, use '*' for all categories
+    - `is_global` (boolean): Whether to remove from global or local memory
+  - Removes the entire category file
+  - Silent operation if category doesn't exist
 
-- **delete_entities**
-  - Remove entities and their relations
-  - Input: `entityNames` (string[])
-  - Cascading deletion of associated relations
-  - Silent operation if entity doesn't exist
-
-- **delete_observations**
-  - Remove specific observations from entities
-  - Input: `deletions` (array of objects)
-    - Each object contains:
-      - `entityName` (string): Target entity
-      - `observations` (string[]): Observations to remove
-  - Silent operation if observation doesn't exist
-
-- **delete_relations**
-  - Remove specific relations from the graph
-  - Input: `relations` (array of objects)
-    - Each object contains:
-      - `from` (string): Source entity name
-      - `to` (string): Target entity name
-      - `relationType` (string): Relationship type
-  - Silent operation if relation doesn't exist
-
-- **read_graph**
-  - Read the entire knowledge graph
-  - No input required
-  - Returns complete graph structure with all entities and relations
-
-- **search_nodes**
-  - Search for nodes based on query
-  - Input: `query` (string)
-  - Searches across:
-    - Entity names
-    - Entity types
-    - Observation content
-  - Returns matching entities and their relations
-
-- **open_nodes**
-  - Retrieve specific nodes by name
-  - Input: `names` (string[])
-  - Returns:
-    - Requested entities
-    - Relations between requested entities
-  - Silently skips non-existent nodes
+- **remove_specific_memory**
+  - Removes a specific memory within a specified category
+  - Input:
+    - `category` (string): The category containing the memory to remove
+    - `memory_content` (string): Content of the memory to remove (partial match)
+    - `is_global` (boolean): Whether to remove from global or local memory
+  - Removes memories containing the specified content
+  - Silent operation if memory doesn't exist
 
 # Usage with Claude Desktop
 
@@ -206,27 +169,21 @@ Here is an example prompt for chat personalization. You could use this prompt in
 ```
 Follow these steps for each interaction:
 
-1. User Identification:
-   - You should assume that you are interacting with default_user
-   - If you have not identified default_user, proactively try to do so.
+1. Always begin by retrieving relevant information from your memory.
+   - Use the retrieve_memories tool to check for relevant information.
+   - Always refer to your stored information as your "memory".
 
-2. Memory Retrieval:
-   - Always begin your chat by saying only "Remembering..." and retrieve all relevant information from your knowledge graph
-   - Always refer to your knowledge graph as your "memory"
+2. While conversing with the user, be attentive to any new information that falls into these categories:
+   a) Personal preferences (communication style, preferred language, etc.)
+   b) Development setup (tools, conventions, workflows, etc.)
+   c) Project information (configurations, requirements, etc.)
+   d) Frequently used commands or processes
 
-3. Memory
-   - While conversing with the user, be attentive to any new information that falls into these categories:
-     a) Basic Identity (age, gender, location, job title, education level, etc.)
-     b) Behaviors (interests, habits, etc.)
-     c) Preferences (communication style, preferred language, etc.)
-     d) Goals (goals, targets, aspirations, etc.)
-     e) Relationships (personal and professional relationships up to 3 degrees of separation)
-
-4. Memory Update:
-   - If any new information was gathered during the interaction, update your memory as follows:
-     a) Create entities for recurring organizations, people, and significant events
-     b) Connect them to the current entities using relations
-     b) Store facts about them as observations
+3. Memory Storage Protocol:
+   - When important information is identified, ask the user if they'd like to store it.
+   - Suggest a relevant category and tags.
+   - Ask whether to store globally (for all projects) or locally (for this project only).
+   - Use the remember_memory tool to store the information.
 ```
 
 ## License
