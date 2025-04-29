@@ -14,13 +14,13 @@ export class MemoryStorage {
     private localStorageLocation: string
   ) {}
 
-  // メモリファイルのパスを取得
+  // Get memory file path
   private getMemoryFilePath(category: string, isGlobal: boolean): string {
     const baseDir = isGlobal ? this.globalStorageLocation : this.localStorageLocation;
     return path.join(baseDir, `${category}.txt`);
   }
 
-  // メモリを保存
+  // Save memory
   async remember(category: string, data: string, tags: string[], isGlobal: boolean): Promise<void> {
     const filePath = this.getMemoryFilePath(category, isGlobal);
 
@@ -33,7 +33,7 @@ export class MemoryStorage {
     await fs.promises.appendFile(filePath, content);
   }
 
-  // メモリを取得
+  // Retrieve memory
   async retrieve(category: string, isGlobal: boolean): Promise<Record<string, string[]>> {
     const filePath = this.getMemoryFilePath(category, isGlobal);
 
@@ -66,7 +66,7 @@ export class MemoryStorage {
     return memories;
   }
 
-  // すべてのメモリを取得
+  // Retrieve all memories
   async retrieveAll(isGlobal: boolean): Promise<Record<string, string[]>> {
     const baseDir = isGlobal ? this.globalStorageLocation : this.localStorageLocation;
     const memories: Record<string, string[]> = {};
@@ -82,7 +82,7 @@ export class MemoryStorage {
         const category = file.replace('.txt', '');
         const categoryMemories = await this.retrieve(category, isGlobal);
 
-        // カテゴリごとにフラット化
+        // Flatten by category
         const flatMemories: string[] = [];
         for (const taggedMemories of Object.values(categoryMemories)) {
           flatMemories.push(...taggedMemories);
@@ -95,7 +95,7 @@ export class MemoryStorage {
     return memories;
   }
 
-  // 特定のメモリを削除
+  // Remove specific memory
   async removeSpecificMemory(
     category: string,
     memoryContent: string,
@@ -114,7 +114,7 @@ export class MemoryStorage {
     await fs.promises.writeFile(filePath, newMemories.join('\\n\\n'));
   }
 
-  // カテゴリのメモリをすべて削除
+  // Clear all memories in a category
   async clearMemory(category: string, isGlobal: boolean): Promise<void> {
     const filePath = this.getMemoryFilePath(category, isGlobal);
 
@@ -123,7 +123,7 @@ export class MemoryStorage {
     }
   }
 
-  // グローバルまたはローカルのメモリをすべて削除
+  // Clear all global or local memories
   async clearAllGlobalOrLocalMemories(isGlobal: boolean): Promise<void> {
     const baseDir = isGlobal ? this.globalStorageLocation : this.localStorageLocation;
 

@@ -14,21 +14,21 @@ export const mockMcpServer = () => {
   };
 };
 
-// テスト用の一時ディレクトリを作成
+// Create temporary directory for tests
 export const createTempDir = () => {
   const tempDir = path.join(process.cwd(), 'temp-test-' + Date.now());
   fs.mkdirSync(tempDir, { recursive: true });
   return tempDir;
 };
 
-// テスト用の一時ディレクトリを削除
+// Remove temporary test directory
 export const removeTempDir = (tempDir: string) => {
   if (fs.existsSync(tempDir)) {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
 };
 
-// テスト用のメモリストレージを初期化
+// Initialize memory storage for tests
 export const initTestMemoryStorage = (tempDir: string) => {
   const globalDir = path.join(tempDir, 'global');
   const localDir = path.join(tempDir, 'local');
