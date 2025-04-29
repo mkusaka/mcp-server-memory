@@ -78,8 +78,8 @@ const initializeServer = (options: ServerOptions) => {
   // MCPサーバー設定
   const server = new McpServer(
     {
-      name: '@mkusaka/mcp-memory-server',
-      version: '0.1.0',
+      name: '@mkusaka/mcp-server-memory',
+      version: '0.0.3',
     },
     options
   );
