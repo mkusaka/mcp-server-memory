@@ -1,43 +1,43 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";  
-import os from "os";  
-import path from "path";  
-  
-// バックアップ用の環境変数  
-const originalEnv = { ...process.env };  
-const originalArgv = [...process.argv];  
-  
-// モック関数  
-const mockHomedir = vi.fn();  
-  
-// OSモジュールのモック  
-vi.mock("os", () => {  
-  const mockOs = {  
-    homedir: mockHomedir,  
-    platform: vi.fn().mockReturnValue("darwin"),  
-  };  
-  return {  
-    ...mockOs,  
-    default: mockOs,  
-  };  
-});  
-  
-// コマンダーモジュールのモック  
-vi.mock("commander", () => {  
-  return {  
-    Command: vi.fn().mockImplementation(() => {  
-      return {  
-        name: vi.fn().mockReturnThis(),  
-        description: vi.fn().mockReturnThis(),  
-        version: vi.fn().mockReturnThis(),  
-        option: vi.fn().mockReturnThis(),  
-        parse: vi.fn(),  
-        opts: vi.fn().mockReturnValue({}),  
-      };  
-    }),  
-  };  
-});  
-  
-describe("Memory Configuration", () => {
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import os from 'os';
+import path from 'path';
+
+// バックアップ用の環境変数
+const originalEnv = { ...process.env };
+const originalArgv = [...process.argv];
+
+// モック関数
+const mockHomedir = vi.fn();
+
+// OSモジュールのモック
+vi.mock('os', () => {
+  const mockOs = {
+    homedir: mockHomedir,
+    platform: vi.fn().mockReturnValue('darwin'),
+  };
+  return {
+    ...mockOs,
+    default: mockOs,
+  };
+});
+
+// コマンダーモジュールのモック
+vi.mock('commander', () => {
+  return {
+    Command: vi.fn().mockImplementation(() => {
+      return {
+        name: vi.fn().mockReturnThis(),
+        description: vi.fn().mockReturnThis(),
+        version: vi.fn().mockReturnThis(),
+        option: vi.fn().mockReturnThis(),
+        parse: vi.fn(),
+        opts: vi.fn().mockReturnValue({}),
+      };
+    }),
+  };
+});
+
+describe('Memory Configuration', () => {
   beforeEach(() => {
     // モックをリセット
     vi.resetAllMocks();
@@ -52,7 +52,7 @@ describe("Memory Configuration", () => {
     process.argv = [...originalArgv];
 
     // デフォルトのモック値を設定
-    mockHomedir.mockReturnValue("/home/user");
+    mockHomedir.mockReturnValue('/home/user');
   });
 
   afterEach(() => {
@@ -63,24 +63,22 @@ describe("Memory Configuration", () => {
     process.argv = [...originalArgv];
   });
 
-  it("uses default storage locations", async () => {
+  it('uses default storage locations', async () => {
     // モジュールをインポート
-    const { getMemoryConfig } = await import("../memory-config.js");
+    const { getMemoryConfig } = await import('../memory-config.js');
 
     // テスト
     const config = getMemoryConfig();
 
     // 検証
-    expect(config.globalStorageLocation).toContain(
-      "/home/user/.config/goose/memory",
-    );
-    expect(config.localStorageLocation).toContain(".goose/memory");
+    expect(config.globalStorageLocation).toContain('/home/user/.config/goose/memory');
+    expect(config.localStorageLocation).toContain('.goose/memory');
     expect(config.enablePersistence).toBe(true);
   });
 
-  it("uses custom storage locations from command line", async () => {
+  it('uses custom storage locations from command line', async () => {
     // コマンダーのモックを上書き
-    const { Command } = await import("commander");
+    const { Command } = await import('commander');
     vi.mocked(Command).mockImplementation(() => {
       return {
         name: vi.fn().mockReturnThis(),
@@ -89,26 +87,26 @@ describe("Memory Configuration", () => {
         option: vi.fn().mockReturnThis(),
         parse: vi.fn(),
         opts: vi.fn().mockReturnValue({
-          globalStorage: "/custom/global",
-          localStorage: "/custom/local",
+          globalStorage: '/custom/global',
+          localStorage: '/custom/local',
         }),
       } as any;
     });
 
     // モジュールをインポート
-    const { getMemoryConfig } = await import("../memory-config.js");
+    const { getMemoryConfig } = await import('../memory-config.js');
 
     // テスト
     const config = getMemoryConfig();
 
     // 検証
-    expect(config.globalStorageLocation).toBe("/custom/global");
-    expect(config.localStorageLocation).toBe("/custom/local");
+    expect(config.globalStorageLocation).toBe('/custom/global');
+    expect(config.localStorageLocation).toBe('/custom/local');
   });
 
-  it("disables persistence when --no-persistence is used", async () => {
+  it('disables persistence when --no-persistence is used', async () => {
     // コマンダーのモックを上書き
-    const { Command } = await import("commander");
+    const { Command } = await import('commander');
     vi.mocked(Command).mockImplementation(() => {
       return {
         name: vi.fn().mockReturnThis(),
@@ -123,7 +121,7 @@ describe("Memory Configuration", () => {
     });
 
     // モジュールをインポート
-    const { getMemoryConfig } = await import("../memory-config.js");
+    const { getMemoryConfig } = await import('../memory-config.js');
 
     // テスト
     const config = getMemoryConfig();
@@ -132,42 +130,42 @@ describe("Memory Configuration", () => {
     expect(config.enablePersistence).toBe(false);
   });
 
-  it("validates paths under home directory", async () => {
+  it('validates paths under home directory', async () => {
     // モジュールをインポート
-    const { isUnderHome } = await import("../memory-config.js");
+    const { isUnderHome } = await import('../memory-config.js');
 
     // テスト
-    expect(isUnderHome("/home/user/projects")).toBe(true);
-    expect(isUnderHome("/home/user")).toBe(true);
-    expect(isUnderHome("/home/user/documents/files")).toBe(true);
+    expect(isUnderHome('/home/user/projects')).toBe(true);
+    expect(isUnderHome('/home/user')).toBe(true);
+    expect(isUnderHome('/home/user/documents/files')).toBe(true);
 
-    expect(isUnderHome("/var/www")).toBe(false);
-    expect(isUnderHome("/tmp")).toBe(false);
-    expect(isUnderHome("/home/otheruser")).toBe(false);
+    expect(isUnderHome('/var/www')).toBe(false);
+    expect(isUnderHome('/tmp')).toBe(false);
+    expect(isUnderHome('/home/otheruser')).toBe(false);
   });
 
-  it("handles relative paths correctly", async () => {
+  it('handles relative paths correctly', async () => {
     // モジュールをインポート
-    const { isUnderHome } = await import("../memory-config.js");
+    const { isUnderHome } = await import('../memory-config.js');
 
     // 現在のディレクトリを一時的に変更
     const originalCwd = process.cwd;
-    process.cwd = vi.fn().mockReturnValue("/home/user/projects");
+    process.cwd = vi.fn().mockReturnValue('/home/user/projects');
 
     // テスト
-    expect(isUnderHome(".")).toBe(true);
-    expect(isUnderHome("./subdir")).toBe(true);
-    expect(isUnderHome("../documents")).toBe(true);
+    expect(isUnderHome('.')).toBe(true);
+    expect(isUnderHome('./subdir')).toBe(true);
+    expect(isUnderHome('../documents')).toBe(true);
 
-    expect(isUnderHome("../../..")).toBe(false);
+    expect(isUnderHome('../../..')).toBe(false);
 
     // 元に戻す
     process.cwd = originalCwd;
   });
 
-  it("creates storage directories when initializing", async () => {
+  it('creates storage directories when initializing', async () => {
     // fsモジュールのモック
-    vi.mock("fs", () => {
+    vi.mock('fs', () => {
       const mockFs = {
         existsSync: vi.fn().mockReturnValue(false),
         mkdirSync: vi.fn(),
@@ -179,38 +177,32 @@ describe("Memory Configuration", () => {
     });
 
     // モジュールをインポート
-    const { initializeStorage } = await import("../memory-config.js");
-    const fs = await import("fs");
+    const { initializeStorage } = await import('../memory-config.js');
+    const fs = await import('fs');
 
     // テスト
     const config = {
-      globalStorageLocation: "/home/user/.config/goose/memory",
-      localStorageLocation: "/home/user/project/.goose/memory",
+      globalStorageLocation: '/home/user/.config/goose/memory',
+      localStorageLocation: '/home/user/project/.goose/memory',
       enablePersistence: true,
     };
 
     initializeStorage(config);
 
     // 検証
-    expect(fs.existsSync).toHaveBeenCalledWith(
-      "/home/user/.config/goose/memory",
-    );
-    expect(fs.existsSync).toHaveBeenCalledWith(
-      "/home/user/project/.goose/memory",
-    );
-    expect(fs.mkdirSync).toHaveBeenCalledWith(
-      "/home/user/.config/goose/memory",
-      { recursive: true },
-    );
-    expect(fs.mkdirSync).toHaveBeenCalledWith(
-      "/home/user/project/.goose/memory",
-      { recursive: true },
-    );
+    expect(fs.existsSync).toHaveBeenCalledWith('/home/user/.config/goose/memory');
+    expect(fs.existsSync).toHaveBeenCalledWith('/home/user/project/.goose/memory');
+    expect(fs.mkdirSync).toHaveBeenCalledWith('/home/user/.config/goose/memory', {
+      recursive: true,
+    });
+    expect(fs.mkdirSync).toHaveBeenCalledWith('/home/user/project/.goose/memory', {
+      recursive: true,
+    });
   });
 
-  it("does not create directories when persistence is disabled", async () => {
+  it('does not create directories when persistence is disabled', async () => {
     // fsモジュールのモック
-    vi.mock("fs", () => {
+    vi.mock('fs', () => {
       const mockFs = {
         existsSync: vi.fn(),
         mkdirSync: vi.fn(),
@@ -222,13 +214,13 @@ describe("Memory Configuration", () => {
     });
 
     // モジュールをインポート
-    const { initializeStorage } = await import("../memory-config.js");
-    const fs = await import("fs");
+    const { initializeStorage } = await import('../memory-config.js');
+    const fs = await import('fs');
 
     // テスト
     const config = {
-      globalStorageLocation: "/home/user/.config/goose/memory",
-      localStorageLocation: "/home/user/project/.goose/memory",
+      globalStorageLocation: '/home/user/.config/goose/memory',
+      localStorageLocation: '/home/user/project/.goose/memory',
       enablePersistence: false,
     };
 
