@@ -3,16 +3,16 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 
-// メモリ設定の型定義
+// Memory configuration type definition
 export interface MemoryConfig {
   globalStorageLocation: string;
   localStorageLocation: string;
   enablePersistence: boolean;
 }
 
-// メモリ設定を取得
+// Get memory configuration
 export const getMemoryConfig = (): MemoryConfig => {
-  // コマンドライン引数から設定を取得
+  // Get configuration from command line arguments
   const program = new Command();
   program
     .name('mcp-memory')
@@ -25,14 +25,14 @@ export const getMemoryConfig = (): MemoryConfig => {
   program.parse(process.argv);
   const options = program.opts();
 
-  // ローカルストレージのデフォルト設定
+  // Default setting for local storage
   const localStorageLocation = options.localStorage || path.join(process.cwd(), '.goose', 'memory');
 
-  // グローバルストレージのデフォルト設定
+  // Default setting for global storage
   const globalStorageLocation =
     options.globalStorage || path.join(os.homedir(), '.config', 'goose', 'memory');
 
-  // 設定を返す
+  // Return configuration
   return {
     globalStorageLocation,
     localStorageLocation,
@@ -40,7 +40,7 @@ export const getMemoryConfig = (): MemoryConfig => {
   };
 };
 
-// パスがホームディレクトリ以下かどうかを確認
+// Check if path is under home directory
 export const isUnderHome = (dirPath: string): boolean => {
   const homePath = os.homedir();
   const absoluteDirPath = path.resolve(dirPath);
@@ -49,7 +49,7 @@ export const isUnderHome = (dirPath: string): boolean => {
   return !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
 };
 
-// ストレージディレクトリを初期化
+// Initialize storage directory
 export const initializeStorage = (config: MemoryConfig): void => {
   if (config.enablePersistence) {
     if (!fs.existsSync(config.globalStorageLocation)) {
