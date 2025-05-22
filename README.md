@@ -28,8 +28,8 @@ Prefers camelCase for variables
 ### Global vs Local Memories
 The memory system supports two storage locations:
 
-- **Global Memories**: Stored in the user's home directory (`~/.config/goose/memory`) and persist across all projects.
-- **Local Memories**: Stored in the current project directory (`.goose/memory`) and are specific to the current project.
+- **Global Memories**: Stored in the user's home directory (`~/.config/mcp-memory`) and persist across all projects.
+- **Local Memories**: Stored in the current project directory (`.mcp-memory`) and are specific to the current project.
 
 ### Memory Storage
 Memories are stored as text entries, with the following characteristics:

@@ -71,8 +71,8 @@ describe('Memory Configuration', () => {
     const config = getMemoryConfig();
 
     // Verify
-    expect(config.globalStorageLocation).toContain('/home/user/.config/goose/memory');
-    expect(config.localStorageLocation).toContain('.goose/memory');
+    expect(config.globalStorageLocation).toContain('/home/user/.config/mcp-memory');
+    expect(config.localStorageLocation).toContain('.mcp-memory');
     expect(config.enablePersistence).toBe(true);
   });
 
@@ -179,20 +179,20 @@ describe('Memory Configuration', () => {
 
     // Test
     const config = {
-      globalStorageLocation: '/home/user/.config/goose/memory',
-      localStorageLocation: '/home/user/project/.goose/memory',
+      globalStorageLocation: '/home/user/.config/mcp-memory',
+      localStorageLocation: '/home/user/project/.mcp-memory',
       enablePersistence: true,
     };
 
     initializeStorage(config);
 
     // Verify
-    expect(fs.existsSync).toHaveBeenCalledWith('/home/user/.config/goose/memory');
-    expect(fs.existsSync).toHaveBeenCalledWith('/home/user/project/.goose/memory');
-    expect(fs.mkdirSync).toHaveBeenCalledWith('/home/user/.config/goose/memory', {
+    expect(fs.existsSync).toHaveBeenCalledWith('/home/user/.config/mcp-memory');
+    expect(fs.existsSync).toHaveBeenCalledWith('/home/user/project/.mcp-memory');
+    expect(fs.mkdirSync).toHaveBeenCalledWith('/home/user/.config/mcp-memory', {
       recursive: true,
     });
-    expect(fs.mkdirSync).toHaveBeenCalledWith('/home/user/project/.goose/memory', {
+    expect(fs.mkdirSync).toHaveBeenCalledWith('/home/user/project/.mcp-memory', {
       recursive: true,
     });
   });
@@ -215,8 +215,8 @@ describe('Memory Configuration', () => {
 
     // Test
     const config = {
-      globalStorageLocation: '/home/user/.config/goose/memory',
-      localStorageLocation: '/home/user/project/.goose/memory',
+      globalStorageLocation: '/home/user/.config/mcp-memory',
+      localStorageLocation: '/home/user/project/.mcp-memory',
       enablePersistence: false,
     };
 
