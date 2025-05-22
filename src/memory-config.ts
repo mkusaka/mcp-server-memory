@@ -26,11 +26,11 @@ export const getMemoryConfig = (): MemoryConfig => {
   const options = program.opts();
 
   // Default setting for local storage
-  const localStorageLocation = options.localStorage || path.join(process.cwd(), '.goose', 'memory');
+  const localStorageLocation = options.localStorage || path.join(process.cwd(), '.mcp-memory');
 
   // Default setting for global storage
   const globalStorageLocation =
-    options.globalStorage || path.join(os.homedir(), '.config', 'goose', 'memory');
+    options.globalStorage || path.join(os.homedir(), '.config', 'mcp-memory');
 
   // Return configuration
   return {

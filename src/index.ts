@@ -51,8 +51,8 @@ The protocol is:
    - Suggest a relevant category like "personal" for user data or "development" for project preferences.  
    - Inquire about any specific tags they want to apply for easier lookup.  
    - Confirm the desired storage location:  
-     - Local storage (.goose/memory) for project-specific details.  
-     - Global storage (~/.config/goose/memory) for user-wide data.  
+     - Local storage (.mcp-memory) for project-specific details.  
+     - Global storage (~/.config/mcp-memory) for user-wide data.  
    - Use the remember_memory tool to store the information.  
      - \`remember_memory(category, data, tags, is_global)\`  
 Keywords that trigger memory tools:  
