@@ -47,5 +47,6 @@
     "commander": "^13.1.0",
     "winston": "^3.17.0",
     "zod": "^3.24.3"
-  }
+  },
+  "packageManager": "pnpm@11.5.2"
 }
